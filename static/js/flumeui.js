@@ -1,5 +1,5 @@
 layui.config({
-    base: '/v3/js/'
+    base: '/static/js/'
 }).extend({
     tools: 'tools'
     , ws: 'websocket'

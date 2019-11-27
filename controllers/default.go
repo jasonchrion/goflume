@@ -8,8 +8,11 @@ type MainController struct {
 	beego.Controller
 }
 
-func (c *MainController) Get() {
-	c.Data["Website"] = "beego.me"
-	c.Data["Email"] = "astaxie@gmail.com"
+func (c *MainController) Index() {
+	c.Data["Title"] = "Flume Manager 3.0"
 	c.TplName = "index.tpl"
+}
+
+func (c *MainController) Get() {
+	c.TplName = c.Ctx.Request.RequestURI[1:] + ".tpl"
 }

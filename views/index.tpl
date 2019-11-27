@@ -27,7 +27,7 @@
 <body class="layui-layout-body">
     <div class="layui-layout layui-layout-admin">
         <div class="layui-header">
-            <div class="layui-logo" th:text="${title}">Flume Manager 3.0</div>
+            <div class="layui-logo">{{.Title}}</div>
             <ul class="layui-nav layui-layout-left">
                 <li class="layui-nav-item">
                     <a href="/index" title="首页">
