@@ -12,7 +12,7 @@ type TemplateController struct {
 	beego.Controller
 }
 
-// Get 响应请求
+//Get 响应请求
 func (c *TemplateController) Get() {
 	c.Data["templates"] = utils.LoadTemplate()
 	c.TplName = "template.tpl"

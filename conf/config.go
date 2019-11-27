@@ -1,6 +1,14 @@
 package conf
 
-import "path/filepath"
+import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
+	"gopkg.in/yaml.v2"
+
+	"github.com/astaxie/beego"
+)
 
 var (
 	//RootPath 根目录
@@ -11,4 +19,28 @@ var (
 	TemplatePath = filepath.Join(RootPath, "template")
 	//FilePath file保存目录
 	FilePath = filepath.Join(RootPath, "file")
+	//TouristConfig Tourist配置
+	TouristConfig = getTouristConfig()
 )
+
+//Tourist tourist配置信息
+type Tourist struct {
+	SourceMap  map[string]string `yaml:"source-map"`
+	ChannelMap map[string]string `yaml:"channel-map"`
+	SinkMap    map[string]string `yaml:"sink-map"`
+}
+
+func getTouristConfig() Tourist {
+	var t Tourist
+	path := filepath.Join(beego.AppPath, "/conf/tourist.yml")
+	_, err := os.Stat(path)
+	if nil != err {
+		return t
+	}
+	data, err := ioutil.ReadFile(path)
+	if nil != err {
+		return t
+	}
+	yaml.Unmarshal(data, &t)
+	return t
+}
