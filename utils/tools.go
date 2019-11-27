@@ -74,3 +74,15 @@ func (a SortByTemplateCreateTime) Less(i, j int) bool { return a[i].CreateTime >
 func SortTemplate(tis SortByTemplateCreateTime) {
 	sort.Stable(tis)
 }
+
+//SortByCollectCreateTime 根据时间排序
+type SortByCollectCreateTime []models.CollectInfo
+
+func (a SortByCollectCreateTime) Len() int           { return len(a) }
+func (a SortByCollectCreateTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a SortByCollectCreateTime) Less(i, j int) bool { return a[i].CreateTime > a[j].CreateTime }
+
+//SortCollect 模板排序
+func SortCollect(cis SortByCollectCreateTime) {
+	sort.Stable(cis)
+}

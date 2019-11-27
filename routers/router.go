@@ -10,7 +10,7 @@ func init() {
 	beego.Router("/", &controllers.MainController{}, "*:Index")
 	beego.Router("/index", &controllers.MainController{}, "*:Index")
 
-	pages := []string{"/info", "/state", "/collect", "/file", "/flume", "/filewatcher"}
+	pages := []string{"/info", "/state", "/file", "/flume", "/filewatcher"}
 
 	for i := range pages {
 		beego.Router(pages[i], &controllers.MainController{})
@@ -24,5 +24,11 @@ func init() {
 
 	beego.Router("/tourist", &controllers.TouristController{})
 	beego.Router("/tourist/page", &controllers.TouristController{}, "*:Page")
+
+	beego.Router("/collect", &controllers.CollectController{})
+	beego.Router("/collect/update", &controllers.CollectController{}, "*:Update")
+	beego.Router("/collect/new", &controllers.CollectController{}, "*:New")
+	beego.Router("/collect/save", &controllers.CollectController{}, "*:Save")
+	beego.Router("/collect/delete", &controllers.CollectController{}, "*:Delete")
 
 }

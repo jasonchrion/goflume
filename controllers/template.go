@@ -37,7 +37,7 @@ func (c *TemplateController) Save() {
 	if "" == t.ID {
 		t.CreateTime = utils.GetTimeNow()
 		t.UpdateTime = t.CreateTime
-		t.ID = utils.Md5(t.Name + t.DESC + t.CreateTime)
+		t.ID = utils.Md5("T-" + t.Name + t.DESC + t.CreateTime)
 	} else {
 		t.UpdateTime = utils.GetTimeNow()
 	}
