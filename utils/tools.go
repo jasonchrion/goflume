@@ -38,11 +38,16 @@ func CreateDir(paths ...string) {
 
 //GetTimeNow 返回格式化当前时间
 func GetTimeNow() string {
-	return FormatTime(time.Now(), "yyyy-MM-dd HH:mm:ss")
+	return FormatTime(time.Now())
 }
 
-//FormatTime 时间格式化
-func FormatTime(t time.Time, format string) string {
+//FormatTime 时间格式化yyyy-MM-dd HH:mm:ss
+func FormatTime(t time.Time) string {
+	return FormatTimeByLayout(t, "yyyy-MM-dd HH:mm:ss")
+}
+
+//FormatTimeByLayout 时间格式化
+func FormatTimeByLayout(t time.Time, format string) string {
 	f := format
 	f = strings.Replace(f, "yyyy", "2006", 1)
 	f = strings.Replace(f, "MM", "01", 1)
@@ -91,7 +96,9 @@ func Md5(s string) string {
 
 //DeleteFile 删除文件
 func DeleteFile(path string) {
-	os.Remove(path)
+	if FileExist(path) {
+		os.Remove(path)
+	}
 }
 
 //SortByTemplateCreateTime 根据时间排序
@@ -119,5 +126,19 @@ func (a SortByCollectCreateTime) Less(i, j int) bool {
 
 //SortCollect 模板排序
 func SortCollect(cis SortByCollectCreateTime) {
+	sort.Stable(cis)
+}
+
+//SortByFileUpdateTime 根据时间排序
+type SortByFileUpdateTime []models.FileInfo
+
+func (a SortByFileUpdateTime) Len() int      { return len(a) }
+func (a SortByFileUpdateTime) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a SortByFileUpdateTime) Less(i, j int) bool {
+	return a[i].UpdateTimeInt > a[j].UpdateTimeInt
+}
+
+//SortFile 模板排序
+func SortFile(cis SortByFileUpdateTime) {
 	sort.Stable(cis)
 }

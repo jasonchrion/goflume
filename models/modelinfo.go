@@ -23,3 +23,13 @@ type CollectInfo struct {
 	Product        string `json:"product" form:"product"`
 	ProductVersion string `json:"productVersion" form:"productVersion"`
 }
+
+//FileInfo 上传的配置文件信息
+type FileInfo struct {
+	FileName      string
+	FilePath      string
+	ShortPath     string
+	UpdateTime    string
+	UpdateTimeInt int64
+	Content       string
+}

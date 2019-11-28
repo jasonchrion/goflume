@@ -105,7 +105,7 @@ func PackageCollect(id string) string {
 		}
 	}
 
-	zipPath := filepath.Join(os.TempDir(), "flume-"+id+"-"+FormatTime(time.Now(), "yyyyMMddHHmmss")+".zip")
+	zipPath := filepath.Join(os.TempDir(), "flume-"+id+"-"+FormatTimeByLayout(time.Now(), "yyyyMMddHHmmss")+".zip")
 	logs.Info("Create collect package at " + zipPath)
 	file, _ := os.Create(zipPath)
 	defer file.Close()

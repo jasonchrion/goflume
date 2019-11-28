@@ -17,8 +17,8 @@ var (
 	CollectPath = filepath.Join(RootPath, "collect")
 	//TemplatePath template保存目录
 	TemplatePath = filepath.Join(RootPath, "template")
-	//FilePath file保存目录
-	FilePath = filepath.Join(RootPath, "file")
+	//FileStorePath file保存目录
+	FileStorePath = filepath.Join(RootPath, "file")
 	//TouristConfig Tourist配置
 	TouristConfig = getTouristConfig()
 	//FlumePath flume根目录

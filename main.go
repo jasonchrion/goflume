@@ -22,5 +22,6 @@ func start() {
 }
 
 func checkdir() {
-	utils.CreateDir(conf.CollectPath, conf.TemplatePath, conf.FilePath, conf.FlumePath, conf.FlumeConfPath)
+	utils.CreateDir(conf.CollectPath, conf.TemplatePath, conf.FileStorePath, conf.FlumePath, conf.FlumeConfPath)
+	utils.CreateSubDir()
 }
