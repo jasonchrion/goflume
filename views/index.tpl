@@ -93,7 +93,7 @@
         </div>
 
         <div class="layui-footer">
-            © flume.manager
+            © <a href="https://github.com/toxrink/goflume" target="_blank">github.com/toxrink/goflume</a>
         </div>
     </div>
     <script src="/static/assets/js/jquery-3.2.1.min.js"></script>

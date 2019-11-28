@@ -21,6 +21,10 @@ var (
 	FilePath = filepath.Join(RootPath, "file")
 	//TouristConfig Tourist配置
 	TouristConfig = getTouristConfig()
+	//FlumePath flume根目录
+	FlumePath = filepath.Join(RootPath, "flume")
+	//FlumeConfPath flume配置文件目录
+	FlumeConfPath = filepath.Join(FlumePath, "conf")
 )
 
 //Tourist tourist配置信息

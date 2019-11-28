@@ -32,16 +32,24 @@ func (c *TemplateController) New() {
 
 //Save 响应请求
 func (c *TemplateController) Save() {
-	var t models.TemplateInfo
-	c.ParseForm(&t)
-	if "" == t.ID {
-		t.CreateTime = utils.GetTimeNow()
-		t.UpdateTime = t.CreateTime
-		t.ID = utils.Md5("T-" + t.Name + t.DESC + t.CreateTime)
+	var ti models.TemplateInfo
+	c.ParseForm(&ti)
+	if "" == ti.ID {
+		ti.CreateTime = utils.GetTimeNow()
+		ti.UpdateTime = ti.CreateTime
+		ti.ID = utils.Md5("T-" + ti.Name + ti.DESC + ti.CreateTime)
 	} else {
-		t.UpdateTime = utils.GetTimeNow()
+		ti.UpdateTime = utils.GetTimeNow()
 	}
-	utils.SaveTemplate(t)
+	ti2 := utils.GetTemplate(ti.ID)
+	if "" != ti2.ID {
+		if "" == ti2.CreateTime {
+			ti.CreateTime = ti.UpdateTime
+		} else {
+			ti.CreateTime = ti2.CreateTime
+		}
+	}
+	utils.SaveTemplate(ti)
 	c.Get()
 }
 

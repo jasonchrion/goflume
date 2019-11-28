@@ -82,9 +82,7 @@
                                 </label>
                                 <div class="layui-input-block">
                                     <textarea name="setting" lay-verify="required" placeholder="请输入采集配置" rows="6"
-                                        class="layui-textarea card-body-textarea-show">
-                                        {{.c.Setting}}
-                                        </textarea>
+                                        class="layui-textarea card-body-textarea-show">{{.c.Setting}}</textarea>
                                 </div>
                             </div>
                             <input value="{{.c.ID}}" type="text" hidden="true" name="cid" />

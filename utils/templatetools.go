@@ -36,7 +36,6 @@ func GetTemplateByName(name string) models.TemplateInfo {
 	body, err := ioutil.ReadFile(filepath.Join(conf.TemplatePath, name))
 	var t models.TemplateInfo
 	if nil != err {
-		logs.Error(err)
 		return t
 	}
 	json.Unmarshal(body, &t)

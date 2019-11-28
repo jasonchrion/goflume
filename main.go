@@ -10,6 +10,10 @@ import (
 )
 
 func main() {
+	start()
+}
+
+func start() {
 	beego.SetLogger(logs.AdapterFile, `{"filename":"goflume.log"}`)
 
 	checkdir()
@@ -18,5 +22,5 @@ func main() {
 }
 
 func checkdir() {
-	utils.CreateDir(conf.CollectPath, conf.TemplatePath, conf.FilePath)
+	utils.CreateDir(conf.CollectPath, conf.TemplatePath, conf.FilePath, conf.FlumePath, conf.FlumeConfPath)
 }

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/astaxie/beego/logs"
@@ -37,8 +38,33 @@ func CreateDir(paths ...string) {
 
 //GetTimeNow 返回格式化当前时间
 func GetTimeNow() string {
-	now := time.Now()
-	return now.Format("2006-01-02 15:04:05")
+	return FormatTime(time.Now(), "yyyy-MM-dd HH:mm:ss")
+}
+
+//FormatTime 时间格式化
+func FormatTime(t time.Time, format string) string {
+	f := format
+	f = strings.Replace(f, "yyyy", "2006", 1)
+	f = strings.Replace(f, "MM", "01", 1)
+	f = strings.Replace(f, "dd", "02", 1)
+	f = strings.Replace(f, "HH", "15", 1)
+	f = strings.Replace(f, "mm", "04", 1)
+	f = strings.Replace(f, "ss", "05", 1)
+	return t.Format(f)
+}
+
+//ParseTime 转换时间2006-01-02 15:04:05
+func ParseTime(t string) time.Time {
+	return ParseTimeByLayout("2006-01-02 15:04:05", t)
+}
+
+//ParseTimeByLayout 转换时间layout
+func ParseTimeByLayout(layout string, t string) time.Time {
+	time, err := time.Parse(layout, t)
+	if nil != err {
+		logs.Error(err)
+	}
+	return time
 }
 
 //SaveAsJSON 保存为json文本
@@ -49,6 +75,11 @@ func SaveAsJSON(path string, obj interface{}) {
 		return
 	}
 	ioutil.WriteFile(path, data, 0666)
+}
+
+//SaveText 保存文本
+func SaveText(path string, content string) {
+	ioutil.WriteFile(path, []byte(content), 0666)
 }
 
 //Md5 字符串转md5
@@ -66,9 +97,11 @@ func DeleteFile(path string) {
 //SortByTemplateCreateTime 根据时间排序
 type SortByTemplateCreateTime []models.TemplateInfo
 
-func (a SortByTemplateCreateTime) Len() int           { return len(a) }
-func (a SortByTemplateCreateTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a SortByTemplateCreateTime) Less(i, j int) bool { return a[i].CreateTime > a[j].CreateTime }
+func (a SortByTemplateCreateTime) Len() int      { return len(a) }
+func (a SortByTemplateCreateTime) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a SortByTemplateCreateTime) Less(i, j int) bool {
+	return ParseTime(a[i].CreateTime).Unix() > ParseTime(a[j].CreateTime).Unix()
+}
 
 //SortTemplate 模板排序
 func SortTemplate(tis SortByTemplateCreateTime) {
@@ -78,9 +111,11 @@ func SortTemplate(tis SortByTemplateCreateTime) {
 //SortByCollectCreateTime 根据时间排序
 type SortByCollectCreateTime []models.CollectInfo
 
-func (a SortByCollectCreateTime) Len() int           { return len(a) }
-func (a SortByCollectCreateTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a SortByCollectCreateTime) Less(i, j int) bool { return a[i].CreateTime > a[j].CreateTime }
+func (a SortByCollectCreateTime) Len() int      { return len(a) }
+func (a SortByCollectCreateTime) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a SortByCollectCreateTime) Less(i, j int) bool {
+	return ParseTime(a[i].CreateTime).Unix() > ParseTime(a[j].CreateTime).Unix()
+}
 
 //SortCollect 模板排序
 func SortCollect(cis SortByCollectCreateTime) {

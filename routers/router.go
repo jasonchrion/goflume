@@ -30,5 +30,6 @@ func init() {
 	beego.Router("/collect/new", &controllers.CollectController{}, "*:New")
 	beego.Router("/collect/save", &controllers.CollectController{}, "*:Save")
 	beego.Router("/collect/delete", &controllers.CollectController{}, "*:Delete")
+	beego.Router("/collect/package", &controllers.CollectController{}, "*:Package")
 
 }

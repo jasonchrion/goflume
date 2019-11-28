@@ -43,6 +43,14 @@ func (c *CollectController) Save() {
 	} else {
 		ci.UpdateTime = utils.GetTimeNow()
 	}
+	ci2 := utils.GetCollect(ci.ID)
+	if "" != ci2.ID {
+		if "" == ci2.CreateTime {
+			ci.CreateTime = ci.UpdateTime
+		} else {
+			ci.CreateTime = ci2.CreateTime
+		}
+	}
 	utils.SaveCollect(ci)
 	c.Get()
 }
@@ -52,4 +60,11 @@ func (c *CollectController) Delete() {
 	id := c.GetString("cid")
 	utils.DeleteCollect(id)
 	c.Get()
+}
+
+//Package 配置打包
+func (c *CollectController) Package() {
+	id := c.GetString("cid")
+	zipPath := utils.PackageCollect(id)
+	c.Ctx.Output.Download(zipPath)
 }
