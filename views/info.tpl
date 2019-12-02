@@ -132,7 +132,7 @@
         log.open("log_content"
             , location.host
             , 1000
-            , /^at\s|Exception:\s|\[ERROR\]|\([^.]+.java:\d+\)|\(Native Method\)/);
+            , /\[C\]|\[E\]/);
     })
 </script>
 

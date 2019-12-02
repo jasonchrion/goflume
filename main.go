@@ -14,7 +14,7 @@ func main() {
 }
 
 func start() {
-	beego.SetLogger(logs.AdapterFile, `{"filename":"goflume.log"}`)
+	beego.SetLogger(logs.AdapterFile, `{"filename":"`+conf.UILogPath+`"}`)
 
 	checkdir()
 

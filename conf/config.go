@@ -25,6 +25,8 @@ var (
 	FlumePath = filepath.Join(RootPath, "flume")
 	//FlumeConfPath flume配置文件目录
 	FlumeConfPath = filepath.Join(FlumePath, "conf")
+	//UILogPath 页面日志路径
+	UILogPath = "/var/log/goflume/goflume.log"
 )
 
 //Tourist tourist配置信息

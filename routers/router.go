@@ -39,4 +39,6 @@ func init() {
 	beego.Router("/file/update", &controllers.FileController{}, "*:Update")
 	beego.Router("/file/save", &controllers.FileController{}, "*:Save")
 
+	beego.Router("/ws/uilog", &controllers.WebSocketController{}, "*:UILog")
+
 }
