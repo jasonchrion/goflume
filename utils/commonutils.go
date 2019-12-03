@@ -124,8 +124,8 @@ func (a SortByCollectCreateTime) Less(i, j int) bool {
 	return ParseTime(a[i].CreateTime).Unix() > ParseTime(a[j].CreateTime).Unix()
 }
 
-//SortCollect 模板排序
-func SortCollect(cis SortByCollectCreateTime) {
+//SortCollector 模板排序
+func SortCollector(cis SortByCollectCreateTime) {
 	sort.Stable(cis)
 }
 

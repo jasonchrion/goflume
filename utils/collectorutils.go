@@ -16,11 +16,11 @@ import (
 	"github.com/astaxie/beego/logs"
 )
 
-//LoadCollect 加载模板
-func LoadCollect() []models.CollectInfo {
+//LoadCollector 加载模板
+func LoadCollector() []models.CollectInfo {
 	var cs = []models.CollectInfo{}
 
-	fis, err := ioutil.ReadDir(conf.CollectPath)
+	fis, err := ioutil.ReadDir(conf.CollectorPath)
 
 	if nil != err {
 		logs.Error(err)
@@ -28,18 +28,18 @@ func LoadCollect() []models.CollectInfo {
 	}
 
 	for _, fi := range fis {
-		t := GetCollectByName(fi.Name())
+		t := GetCollectorByName(fi.Name())
 		cs = append(cs, t)
 	}
 
-	SortCollect(cs)
+	SortCollector(cs)
 
 	return cs
 }
 
-//GetCollectByName 获取模板信息
-func GetCollectByName(name string) models.CollectInfo {
-	body, err := ioutil.ReadFile(filepath.Join(conf.CollectPath, name))
+//GetCollectorByName 获取模板信息
+func GetCollectorByName(name string) models.CollectInfo {
+	body, err := ioutil.ReadFile(filepath.Join(conf.CollectorPath, name))
 	var c models.CollectInfo
 	if nil != err {
 		return c
@@ -48,27 +48,27 @@ func GetCollectByName(name string) models.CollectInfo {
 	return c
 }
 
-//GetCollect 获取采集配置
-func GetCollect(id string) models.CollectInfo {
-	return GetCollectByName(id + ".json")
+//GetCollector 获取采集配置
+func GetCollector(id string) models.CollectInfo {
+	return GetCollectorByName(id + ".json")
 }
 
-//SaveCollect 保存采集配置
-func SaveCollect(c models.CollectInfo) {
-	logs.Info("save collect " + c.ID)
+//SaveCollector 保存采集配置
+func SaveCollector(c models.CollectInfo) {
+	logs.Info("save collector " + c.ID)
 	SaveText(filepath.Join(conf.FlumeConfPath, c.ID+".conf"), c.Setting)
-	SaveAsJSON(filepath.Join(conf.CollectPath, c.ID+".json"), c)
+	SaveAsJSON(filepath.Join(conf.CollectorPath, c.ID+".json"), c)
 }
 
-//DeleteCollect 删除采集配置
-func DeleteCollect(id string) {
-	logs.Info("delete collect " + id)
-	DeleteFile(filepath.Join(conf.CollectPath, id+".json"))
+//DeleteCollector 删除采集配置
+func DeleteCollector(id string) {
+	logs.Info("delete collector " + id)
+	DeleteFile(filepath.Join(conf.CollectorPath, id+".json"))
 }
 
-//PackageCollect 打包采集配置
-func PackageCollect(id string) string {
-	logs.Info("Create collect package for " + id)
+//PackageCollector 打包采集配置
+func PackageCollector(id string) string {
+	logs.Info("create collector package for " + id)
 	flumeConfPath := filepath.Join(conf.FlumeConfPath, id+".conf")
 	confContent, _ := ioutil.ReadFile(flumeConfPath)
 	setting := string(confContent)
@@ -106,7 +106,7 @@ func PackageCollect(id string) string {
 	}
 
 	zipPath := filepath.Join(os.TempDir(), "flume-"+id+"-"+FormatTimeByLayout(time.Now(), "yyyyMMddHHmmss")+".zip")
-	logs.Info("Create collect package at " + zipPath)
+	logs.Info("create collect package at " + zipPath)
 	file, _ := os.Create(zipPath)
 	defer file.Close()
 	writer := zip.NewWriter(file)

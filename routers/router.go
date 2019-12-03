@@ -25,12 +25,12 @@ func init() {
 	beego.Router("/tourist", &controllers.TouristController{})
 	beego.Router("/tourist/page", &controllers.TouristController{}, "*:Page")
 
-	beego.Router("/collect", &controllers.CollectController{})
-	beego.Router("/collect/update", &controllers.CollectController{}, "*:Update")
-	beego.Router("/collect/new", &controllers.CollectController{}, "*:New")
-	beego.Router("/collect/save", &controllers.CollectController{}, "*:Save")
-	beego.Router("/collect/delete", &controllers.CollectController{}, "*:Delete")
-	beego.Router("/collect/package", &controllers.CollectController{}, "*:Package")
+	beego.Router("/collect", &controllers.CollectorController{})
+	beego.Router("/collect/update", &controllers.CollectorController{}, "*:Update")
+	beego.Router("/collect/new", &controllers.CollectorController{}, "*:New")
+	beego.Router("/collect/save", &controllers.CollectorController{}, "*:Save")
+	beego.Router("/collect/delete", &controllers.CollectorController{}, "*:Delete")
+	beego.Router("/collect/package", &controllers.CollectorController{}, "*:Package")
 
 	beego.Router("/file", &controllers.FileController{})
 	beego.Router("/file/download", &controllers.FileController{}, "*:Download")

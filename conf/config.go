@@ -13,8 +13,8 @@ import (
 var (
 	//RootPath 根目录
 	RootPath = "D:\\flume_ui2"
-	//CollectPath collect保存目录
-	CollectPath = filepath.Join(RootPath, "collect")
+	//CollectorPath collect保存目录
+	CollectorPath = filepath.Join(RootPath, "collect")
 	//TemplatePath template保存目录
 	TemplatePath = filepath.Join(RootPath, "template")
 	//FileStorePath file保存目录
@@ -25,8 +25,15 @@ var (
 	FlumePath = filepath.Join(RootPath, "flume")
 	//FlumeConfPath flume配置文件目录
 	FlumeConfPath = filepath.Join(FlumePath, "conf")
+	//FlumeBinPath flume bin目录
+	FlumeBinPath = filepath.Join(FlumePath, "bin")
+	//LogPath 页面日志路径
+	LogPath = "/var/log/" + beego.BConfig.AppName
 	//UILogPath 页面日志路径
-	UILogPath = "/var/log/goflume/goflume.log"
+	UILogPath = LogPath + "/web.log"
+
+	//StartInWin windows上启动flume命令
+	StartInWin = "flume-ng.cmd agent --name ^NAME^ --conf ^CONF^ --conf-file ^CONFIG_FILE^ --property \"^OTHERS^\""
 )
 
 //Tourist tourist配置信息

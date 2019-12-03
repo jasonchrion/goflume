@@ -7,33 +7,33 @@ import (
 	"github.com/astaxie/beego"
 )
 
-//CollectController 控制器
-type CollectController struct {
+//CollectorController 控制器
+type CollectorController struct {
 	beego.Controller
 }
 
 //Get 响应请求
-func (c *CollectController) Get() {
-	c.Data["collects"] = utils.LoadCollect()
+func (c *CollectorController) Get() {
+	c.Data["collects"] = utils.LoadCollector()
 	c.TplName = "collect.tpl"
 }
 
 //Update 响应请求
-func (c *CollectController) Update() {
+func (c *CollectorController) Update() {
 	id := c.GetString("cid")
-	c.Data["c"] = utils.GetCollect(id)
+	c.Data["c"] = utils.GetCollector(id)
 	c.Data["templates"] = utils.LoadTemplate()
 	c.TplName = "collectForm.tpl"
 }
 
 //New 响应请求
-func (c *CollectController) New() {
+func (c *CollectorController) New() {
 	c.Data["templates"] = utils.LoadTemplate()
 	c.TplName = "collectForm.tpl"
 }
 
 //Save 响应请求
-func (c *CollectController) Save() {
+func (c *CollectorController) Save() {
 	var ci models.CollectInfo
 	c.ParseForm(&ci)
 	if "" == ci.ID {
@@ -43,7 +43,7 @@ func (c *CollectController) Save() {
 	} else {
 		ci.UpdateTime = utils.GetTimeNow()
 	}
-	ci2 := utils.GetCollect(ci.ID)
+	ci2 := utils.GetCollector(ci.ID)
 	if "" != ci2.ID {
 		if "" == ci2.CreateTime {
 			ci.CreateTime = ci.UpdateTime
@@ -51,20 +51,20 @@ func (c *CollectController) Save() {
 			ci.CreateTime = ci2.CreateTime
 		}
 	}
-	utils.SaveCollect(ci)
+	utils.SaveCollector(ci)
 	c.Get()
 }
 
 //Delete 响应请求
-func (c *CollectController) Delete() {
+func (c *CollectorController) Delete() {
 	id := c.GetString("cid")
-	utils.DeleteCollect(id)
+	utils.DeleteCollector(id)
 	c.Get()
 }
 
 //Package 配置打包
-func (c *CollectController) Package() {
+func (c *CollectorController) Package() {
 	id := c.GetString("cid")
-	zipPath := utils.PackageCollect(id)
+	zipPath := utils.PackageCollector(id)
 	c.Ctx.Output.Download(zipPath)
 }
