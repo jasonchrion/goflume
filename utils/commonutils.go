@@ -7,6 +7,7 @@ import (
 	"goflume/models"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -101,7 +102,12 @@ func DeleteFile(path string) {
 	}
 }
 
-//SortByTemplateCreateTime 根据时间排序
+//IsOnWindows 是否在windows上运行
+func IsOnWindows() bool {
+	return runtime.GOOS == "windows"
+}
+
+//SortByTemplateCreateTime 模板根据时间排序
 type SortByTemplateCreateTime []models.TemplateInfo
 
 func (a SortByTemplateCreateTime) Len() int      { return len(a) }
@@ -115,7 +121,7 @@ func SortTemplate(tis SortByTemplateCreateTime) {
 	sort.Stable(tis)
 }
 
-//SortByCollectCreateTime 根据时间排序
+//SortByCollectCreateTime 采集器根据时间排序
 type SortByCollectCreateTime []models.CollectInfo
 
 func (a SortByCollectCreateTime) Len() int      { return len(a) }
@@ -124,12 +130,12 @@ func (a SortByCollectCreateTime) Less(i, j int) bool {
 	return ParseTime(a[i].CreateTime).Unix() > ParseTime(a[j].CreateTime).Unix()
 }
 
-//SortCollector 模板排序
+//SortCollector 采集器排序
 func SortCollector(cis SortByCollectCreateTime) {
 	sort.Stable(cis)
 }
 
-//SortByFileUpdateTime 根据时间排序
+//SortByFileUpdateTime 文件根据时间排序
 type SortByFileUpdateTime []models.FileInfo
 
 func (a SortByFileUpdateTime) Len() int      { return len(a) }
@@ -138,7 +144,34 @@ func (a SortByFileUpdateTime) Less(i, j int) bool {
 	return a[i].UpdateTimeInt > a[j].UpdateTimeInt
 }
 
-//SortFile 模板排序
+//SortFile 文件排序
 func SortFile(cis SortByFileUpdateTime) {
+	sort.Stable(cis)
+}
+
+//SortByCollectorState 采集器根据时间和状态排序
+type SortByCollectorState []models.CollectorStateInfo
+
+func (a SortByCollectorState) Len() int      { return len(a) }
+func (a SortByCollectorState) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a SortByCollectorState) Less(i, j int) bool {
+	if a[i].State.Run == 1 && a[j].State.Run == 1 {
+		return ParseTime(a[i].CreateTime).Unix() > ParseTime(a[j].CreateTime).Unix()
+	} else if a[i].State.Run == 2 && a[j].State.Run == 2 {
+		return ParseTime(a[i].CreateTime).Unix() > ParseTime(a[j].CreateTime).Unix()
+	} else if a[i].State.Run == 1 {
+		return true
+	} else if a[j].State.Run == 1 {
+		return false
+	} else if a[i].State.Run == 2 {
+		return true
+	} else if a[j].State.Run == 2 {
+		return false
+	}
+	return ParseTime(a[i].CreateTime).Unix() > ParseTime(a[j].CreateTime).Unix()
+}
+
+//SortCollectorState 采集器运行状态排序
+func SortCollectorState(cis SortByCollectorState) {
 	sort.Stable(cis)
 }

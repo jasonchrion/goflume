@@ -2,21 +2,39 @@ package utils
 
 import (
 	"archive/zip"
+	"bufio"
 	"encoding/json"
 	"goflume/conf"
 	"goflume/models"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/astaxie/beego/logs"
 )
 
-//LoadCollector 加载模板
+var (
+	//保存采集器端口
+	portMap = map[string]int{}
+	//保存采集器启动命令
+	commandMap = map[string]StartCommand{}
+)
+
+//StartCommand 启动命令
+type StartCommand struct {
+	Bin  string
+	Args []string
+}
+
+//LoadCollector 加载采集器
 func LoadCollector() []models.CollectInfo {
 	var cs = []models.CollectInfo{}
 
@@ -135,4 +153,256 @@ func PackageCollector(id string) string {
 	}
 
 	return zipPath
+}
+
+//GetStartCommandByID 根据id获取启动命令
+func GetStartCommandByID(id string) StartCommand {
+	collector := GetCollector(id)
+	return GetStartCommand(collector)
+}
+
+//GetStartCommand 获取启动命令
+func GetStartCommand(collector models.CollectInfo) StartCommand {
+	startCmd := commandMap[collector.ID]
+
+	if "" != startCmd.Bin {
+		return startCmd
+	}
+
+	r, _ := regexp.Compile("n?([a-zA-Z0-9]+).sources")
+	match := r.FindStringSubmatch(collector.Setting)
+	name := string(match[1])
+
+	configFile := filepath.Join(conf.FlumeConfPath, collector.ID+".conf")
+
+	port := strconv.Itoa(GetMetricPort(collector.ID))
+
+	var start string
+	var args []string
+	if IsOnWindows() {
+		start = filepath.Join(conf.FlumeBinPath, "flume-ng.cmd")
+		jvmArgs := []string{"flumeCid=" + collector.ID + " -Xmx" + collector.MemSize + "m -Xms" + collector.MemSize + "m",
+			";flume.monitoring.type=http",
+			";flume.monitoring.port=" + port}
+		args = []string{"agent",
+			"--name",
+			name,
+			"--conf",
+			conf.FlumeConfPath,
+			"--conf-file",
+			configFile,
+			"--property",
+			strings.Join(jvmArgs, "")}
+	} else {
+		start = filepath.Join(conf.FlumeBinPath, "flume-ng")
+		args = []string{"agent",
+			"--name",
+			name,
+			"--conf",
+			conf.FlumeConfPath,
+			"--conf-file",
+			configFile,
+			"--no-reload-conf",
+			"-DflumeCid=" + collector.ID,
+			"-Xmx" + collector.MemSize + "m",
+			"-Xms" + collector.MemSize + "m",
+			"-Dflume.monitoring.type=http",
+			"-Dflume.monitoring.port=" + port}
+	}
+	commandMap[collector.ID] = StartCommand{Bin: start, Args: args}
+	return commandMap[collector.ID]
+}
+
+//GetListenMetricPort 获取运行中的监控端口
+func GetListenMetricPort(id string) int {
+	return portMap[id]
+}
+
+//GetMetricPort 获取监控端口
+func GetMetricPort(id string) int {
+	port := portMap[id]
+	if 0 != port {
+		return port
+	}
+	getPort := true
+	for getPort {
+		port = 40000 + rand.Intn(10000)
+		getPort = false
+		for _, p := range portMap {
+			if p == port {
+				getPort = true
+				break
+			}
+		}
+	}
+	portMap[id] = port
+	return port
+}
+
+//GetRunStateMap 获取采集器运行状态
+//
+//返回cid:[cid,port,pid]
+func GetRunStateMap() map[string]models.CollectorRunInfo {
+	if IsOnWindows() {
+		return GetRunStateMapOnWindows()
+	} else {
+		return GetRunStateMapOnLinux()
+	}
+}
+
+//GetRunStateMapOnLinux linux下获取运行状态
+func GetRunStateMapOnLinux() map[string]models.CollectorRunInfo {
+	var stateMap = map[string]models.CollectorRunInfo{}
+	return stateMap
+}
+
+//GetRunStateMapOnWindows windows下获取运行状态
+func GetRunStateMapOnWindows() map[string]models.CollectorRunInfo {
+	var stateMap = map[string]models.CollectorRunInfo{}
+	cmd := exec.Command("cmd", "/C", "wmic process where caption='java.exe' get commandline,processid /value")
+	stdout, err := cmd.StdoutPipe()
+	defer stdout.Close()
+	if nil != err {
+		logs.Error(err)
+		return stateMap
+	}
+	err2 := cmd.Start()
+	if nil != err2 {
+		logs.Error(err2)
+		return stateMap
+	}
+	reader := bufio.NewReader(stdout)
+
+	var states [][]string
+	cidReg, _ := regexp.Compile("-DflumeCid=([a-zA-Z0-9]{32})")
+	portReg, _ := regexp.Compile("-Dflume.monitoring.port=([0-9]{5})")
+	pidReg, _ := regexp.Compile("[0-9]+")
+	skip := false
+	for {
+		line, err3 := reader.ReadString('\n')
+		if err3 != nil {
+			break
+		}
+		if strings.HasPrefix(line, "CommandLine=") {
+			cidFind := cidReg.FindStringSubmatch(line)
+			if 0 == len(cidFind) {
+				skip = true
+				continue
+			}
+			port := portMap[cidFind[1]]
+			if 0 != port {
+				states = append(states, []string{cidFind[1], strconv.Itoa(port)})
+			} else {
+				portFind := portReg.FindStringSubmatch(line)
+				if 0 == len(portFind) {
+					skip = true
+					continue
+				}
+				states = append(states, []string{cidFind[1], portFind[1]})
+			}
+		} else if strings.HasPrefix(line, "ProcessId=") {
+			if skip {
+				skip = false
+				continue
+			} else {
+				pidFind := pidReg.FindString(line)
+				states[len(states)-1] = append(states[len(states)-1], pidFind)
+			}
+		}
+	}
+	for _, state := range states {
+		a1, _ := strconv.Atoi(state[1])
+		a2, _ := strconv.Atoi(state[2])
+		a3 := models.CollectorRunInfo{ID: state[0],
+			Port: a1,
+			PID:  a2,
+			Run:  1}
+		stateMap[state[0]] = a3
+		//更新采集器监控端口
+		portMap[a3.ID] = a3.Port
+	}
+	return stateMap
+}
+
+//GetRunInfo 获取采集器运行信息
+func GetRunInfo(id string) models.CollectorRunInfo {
+	return GetRunStateMap()[id]
+}
+
+//StartCollector 启动采集器
+func StartCollector(id string) {
+	if checkStart(id) {
+		return
+	}
+	startCmd := GetStartCommandByID(id)
+	if "" != startCmd.Bin {
+		logs.Info("start collector " + id)
+		if IsOnWindows() {
+			go func() {
+				//windows下启动
+				cmd := exec.Command(startCmd.Bin, startCmd.Args...)
+				stdout, err := cmd.StderrPipe()
+				defer stdout.Close()
+				if nil != err {
+					logs.Error(err)
+					return
+				}
+				err2 := cmd.Start()
+				if nil != err2 {
+					logs.Error(err2)
+					return
+				}
+				reader := bufio.NewReader(stdout)
+				for {
+					_, err3 := reader.ReadString('\n')
+					if err3 != nil {
+						break
+					}
+				}
+				logs.Info("close collector error stream " + id)
+			}()
+			waitFor(60, true, id)
+		} else {
+			//linux下启动
+			err := syscall.Exec(startCmd.Bin, startCmd.Args, os.Environ())
+			if nil != err {
+				logs.Error(err)
+			}
+		}
+	}
+}
+
+//StopCollector 关闭采集器
+func StopCollector(id string) {
+	runInfo := GetRunInfo(id)
+	logs.Info("close collector", runInfo)
+	if 0 != runInfo.PID {
+		if IsOnWindows() {
+			//windows下关闭
+			cmd := exec.Command("taskkill", "/F", "/PID", strconv.Itoa(runInfo.PID))
+			cmd.Start()
+		} else {
+			//linux下关闭
+
+		}
+		//清除监控端口
+		portMap[id] = 0
+		waitFor(60, false, id)
+	}
+}
+
+//检查是否启动
+func checkStart(id string) bool {
+	return GetRunInfo(id).PID != 0
+}
+
+//等待启动/关闭
+func waitFor(waitSecond int, isStartAction bool, id string) {
+	time.Sleep(2 * time.Second)
+	for wait := waitSecond - 2; wait > 0; wait-- {
+		if checkStart(id) == isStartAction {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
 }

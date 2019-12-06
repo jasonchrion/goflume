@@ -3,8 +3,12 @@ package controllers
 import (
 	"bufio"
 	"goflume/conf"
+	"goflume/utils"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -20,7 +24,6 @@ const (
 )
 
 var (
-	filename = "D:\\vscode\\golang\\src\\goflume\\goflume.log"
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -43,6 +46,49 @@ func (c *WebSocketController) UILog() {
 	go tail(ws, conf.UILogPath)
 	readClient(ws, func(addr string, b []byte) {
 		logs.Info(addr + ": " + string(b))
+	})
+}
+
+//CollectorLog 采集器日志跟踪
+func (c *WebSocketController) CollectorLog() {
+	ws, err := websocket.Upgrade(c.Ctx.ResponseWriter, c.Ctx.Request, nil, upgrader.ReadBufferSize, upgrader.WriteBufferSize)
+	if nil != err {
+		logs.Error(err)
+		return
+	}
+	ws.WriteMessage(websocket.TextMessage, []byte("200"))
+	cid := c.GetString("cid")
+	go tail(ws, conf.LogPath+"/"+cid+"/flume-"+cid+".log")
+	readClient(ws, func(addr string, b []byte) {
+		logs.Info(addr + ": " + string(b))
+	})
+}
+
+//Metric 采集器数据监控
+func (c *WebSocketController) Metric() {
+	ws, err := websocket.Upgrade(c.Ctx.ResponseWriter, c.Ctx.Request, nil, upgrader.ReadBufferSize, upgrader.WriteBufferSize)
+	if nil != err {
+		logs.Error(err)
+		return
+	}
+	ws.WriteMessage(websocket.TextMessage, []byte("200"))
+	go readClient(ws, func(addr string, b []byte) {
+		content := string(b)
+		if len(content) == 32 {
+			port := utils.GetListenMetricPort(content)
+			if 0 != port {
+				resp, err := http.Get("http://localhost:" + strconv.Itoa(port) + "/metrics")
+				if nil != err {
+					ws.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+				} else {
+					body, _ := ioutil.ReadAll(resp.Body)
+					msg := append([]byte(content+"#"), body...)
+					ws.WriteMessage(websocket.TextMessage, msg)
+				}
+			}
+		} else {
+			logs.Info(addr, content)
+		}
 	})
 }
 

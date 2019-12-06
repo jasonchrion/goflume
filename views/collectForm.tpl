@@ -68,7 +68,7 @@
                             <div class="layui-form-item">
                                 <label class="layui-form-label">内存大小(MB)</label>
                                 <div class="layui-input-block">
-                                    {{if `eq .c.MemSize ""`}}
+                                    {{if eq .c.MemSize ""}}
                                         <input type="text" name="memSize" value="2048" placeholder="请输入内存大小" class="layui-input">
                                     {{else}}
                                         <input type="text" name="memSize" value="{{.c.MemSize}}" placeholder="请输入内存大小" class="layui-input">

@@ -33,3 +33,21 @@ type FileInfo struct {
 	UpdateTimeInt int64
 	Content       string
 }
+
+//CollectorStateInfo 采集器运行状态信息
+type CollectorStateInfo struct {
+	ID         string           `json:"id"`
+	Name       string           `json:"name"`
+	State      CollectorRunInfo `json:"state"`
+	CMD        string           `json:"cmd"`
+	CreateTime string           `json:"createTime"`
+}
+
+//CollectorRunInfo 运行情况
+type CollectorRunInfo struct {
+	ID   string `json:"id"`
+	Port int    `json:"port"`
+	PID  int    `json:"pid"`
+	//0-关闭 1-运行 2-重启
+	Run int `json:"run"`
+}

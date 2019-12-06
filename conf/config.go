@@ -33,7 +33,7 @@ var (
 	UILogPath = LogPath + "/web.log"
 
 	//StartInWin windows上启动flume命令
-	StartInWin = "flume-ng.cmd agent --name ^NAME^ --conf ^CONF^ --conf-file ^CONFIG_FILE^ --property \"^OTHERS^\""
+	// StartInWin = "flume-ng.cmd agent --name ^NAME^ --conf ^CONF^ --conf-file ^CONFIG_FILE^ --property \"^OTHERS^\""
 )
 
 //Tourist tourist配置信息
